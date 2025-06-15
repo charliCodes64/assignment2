@@ -50,16 +50,17 @@ void draw_objects(int randShapeHolder, int xAxisTog, int yAxisTog) {//used to ho
 		al_draw_filled_rectangle(xAxisTog - 25, yAxisTog - 10, xAxisTog + 55, yAxisTog + 30, al_map_rgb(5, 100, 5));
 		break;
 	case 4:
-		al_draw_filled_triangle(xAxisTog + 20, yAxisTog + 20, xAxisTog + 25, yAxisTog + 5, xAxisTog + 30, yAxisTog + 20, al_map_rgb(50, 50, 50));
+		al_draw_filled_triangle(xAxisTog - 30, yAxisTog + 25, xAxisTog, yAxisTog - 25, xAxisTog + 25, yAxisTog + 50, al_map_rgb(50, 150, 50));
+		al_draw_filled_triangle(xAxisTog - 28, yAxisTog + 23, xAxisTog, yAxisTog - 23, xAxisTog + 23, yAxisTog + 48, al_map_rgb(100, 50, 75));
 		break;
 	case 5:
-		al_draw_filled_triangle(xAxisTog + 20, yAxisTog + 20, xAxisTog + 25, yAxisTog + 5, xAxisTog + 30, yAxisTog + 20, al_map_rgb(150, 50, 150));
+		al_draw_filled_triangle(xAxisTog + 15, yAxisTog + 45, xAxisTog + 40, yAxisTog + 5, xAxisTog + 65, yAxisTog + 45, al_map_rgb(150, 50, 150));
 		break;
 	case 6:
-		al_draw_ellipse(xAxisTog + 25, yAxisTog + 5, 5, 5, al_map_rgb(255, 0, 0), 2);
+		al_draw_ellipse(xAxisTog + 25, yAxisTog + 5, 30, 30, al_map_rgb(255, 0, 0), 3);
 		break;
 	case 7:
-		al_draw_ellipse(xAxisTog + 8, yAxisTog + 8, 5, 5, al_map_rgb(225, 100, 270), 2);
+		al_draw_ellipse(xAxisTog + 25, yAxisTog + 2, 30, 30, al_map_rgb(225, 100, 270), 2);
 		break;
 	case 8:
 		al_draw_filled_pieslice(xAxisTog + 2, yAxisTog + 2, 50, 2, ALLEGRO_PI + 2, al_map_rgb(150, 150, 150));
@@ -114,33 +115,33 @@ void secondShapeChoice(int x, int y, int cellx, int celly, int shape, memory& me
 }
 //uncovers card based on the cell user clicks
 void covers(int x, int y, int cellx, int celly, memory& memorys, int& userChoice) {
-	if (memorys.getCellPlayed(cellx, celly) != -1) {
+	if (memorys.getCellPlayed(cellx, celly) != -1) {//makes sure cell hasn't been played
 		return;
 	}
 	int shape = memorys.get_shape(cellx, celly);
 
 	if (userChoice == 0) {
-		firstShapeChoice(x, y, cellx, celly, shape, memorys, userChoice);
+		firstShapeChoice(x, y, cellx, celly, shape, memorys, userChoice);//calls firstShapeChoice when first click
 	}
 	else if (userChoice == 1) {
 		secondShapeChoice(x, y, cellx, celly, shape, memorys, userChoice);
 	}
 }
  
-void get_mouse_input(int x, int y, memory& game_logic, int& click) {
+void get_mouse_input(int x, int y, memory& memorys, int& click) {
 	int cellWidth = 160;//simple math take width and height and divide by 5 (number of cells)
 	int cellHeight = 130;
 	int totalWidth = 800;
 	int totalHeight = 650;
 
-	if (x < totalWidth && y < totalHeight) {
-		int column = x / cellWidth;
+	if (x < totalWidth && y < totalHeight) {//checking if mouse is within display
+		int column = x / cellWidth;//this is calculating position clicked by saying if user click on x of 255 / 160 (cell width) = 2 (finds the ceiling) so this implys they are in column 2
 		int row = y / cellHeight;
 
- 		int centerX = (column * cellWidth) + 80; 
+ 		int centerX = (column * cellWidth) + 80; //find center x cord of cell adding 80 because 160/2 = 80
 		int centerY = (row * cellHeight) + 65;
 
-		covers(centerX, centerY, row, column, game_logic, click);
+		covers(centerX, centerY, row, column, memorys, click);//sending location for cover
 	}
 }
  
@@ -181,8 +182,8 @@ int main()
 
 	int click = 0;
 
-	memory game_logic;
-	game_logic.setup();
+	memory memorys;
+	memorys.setup();
 
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 	draw_Grid();
@@ -190,19 +191,19 @@ int main()
 		ALLEGRO_EVENT ev;
 		al_wait_for_event(event_queue, &ev);
 
-		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE || ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
 			done = true;
 		}
-		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && (ev.mouse.button & 1)) {
+		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && (ev.mouse.button & 1)) {//detecting mouse
 			mx = ev.mouse.x;
 			my = ev.mouse.y;
 			draw = true;
 		}
 		else if (ev.type == ALLEGRO_EVENT_KEY_DOWN && ev.keyboard.keycode == ALLEGRO_KEY_R) {
-			if (game_logic.getTotalMatched() == 12) {
-				game_logic = memory();
-				game_logic.setup();
-				click = 0;
+			if (memorys.getTotalMatched() == 12) {//grabbing everything needed to restart and reset
+				memorys = memory();//new instance 
+				memorys.setup();
+				//click = 0;
 				al_clear_to_color(al_map_rgb(0, 0, 0));
 				draw_Grid();
 				al_flip_display();
@@ -210,18 +211,18 @@ int main()
 		}
 		draw_Grid();
 
-		int correct = game_logic.getTotalMatched();
-		int totalPairs = game_logic.getTotalRemaining();
-		al_draw_filled_rectangle(650, 530, 780, 580, al_map_rgb(0, 0, 0));
-		al_draw_textf(font24, al_map_rgb(255, 255, 255), 650, 535, 0, "Remaining: %d", totalPairs);
-		al_draw_textf(font24, al_map_rgb(255, 255, 255), 650, 560, 0, "try22: %d", correct);
+		int correct = memorys.getTotalMatched();
+		int totalPairs = memorys.getTotalRemaining();
+		al_draw_filled_rectangle(650, 530, 780, 580, al_map_rgb(0, 0, 0));//cover
+		al_draw_textf(font24, al_map_rgb(255, 255, 255), 650, 535, 0, "Remaining: %d", totalPairs);//cosmetics
+		al_draw_textf(font24, al_map_rgb(255, 255, 255), 650, 560, 0, "Correct4: %d", correct);
 
-		if (correct == 12) {
-			al_draw_textf(font24, al_map_rgb(255, 0, 0), width / 2, height / 2 + 40, ALLEGRO_ALIGN_CENTER, "Press \"R\" to restart!");
+		if (correct == 12) {//checker
+			al_draw_textf(font24, al_map_rgb(0, 0, 255), width / 2, height / 2, ALLEGRO_ALIGN_CENTER, "Press \"R\" to restart!");
 		}
 
 		if (draw) {
-			get_mouse_input(mx, my, game_logic, click);
+			get_mouse_input(mx, my, memorys, click);
 			draw = false;
 		}
 

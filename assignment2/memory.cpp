@@ -3,18 +3,19 @@
 #include <iostream>
 
 memory::memory() {
-	for (int i = 0; i < 5; i++) {
+    //https://stackoverflow.com/questions/15520880/initializing-entire-2d-array-with-one-value
+    //https://www.geeksforgeeks.org/c/how-to-initialize-2d-array-in-c/
+	for (int i = 0; i < 5; i++) {//setting all the spots in the arrays to empty so that they can be filled
 		for (int j = 0; j < 5; j++) {
-			boardLayout[i][j] = -1;
-			boardPlayedLayout[i][j] = -1;
+			boardLayout[i][j] = -1;//for shapes
+			boardPlayedLayout[i][j] = -1;//for played cells
 		}
 	}
-	correct = 0;
-	totalPairs = 12;
-
 }
   
-void memory::setup() {
+void memory::setup() {//sets up the board and cells
+    correct = 0;
+    totalPairs = 12;
     srand(time(0));
 
     int index = 0;
@@ -43,31 +44,18 @@ void memory::setup() {
     }
 }
  
-int memory::get_shape(int x, int y) { 
-	return boardLayout[x][y];
-}
-//gets value at positon of cell
-int memory::getCellPlayed(int x, int y) {
-	return boardPlayedLayout[x][y];
-}
-//setting position
-void memory::cellPlayed(int x, int y, int val) {
+ void memory::cellPlayed(int x, int y, int val) {//setting position
     int& cell = boardPlayedLayout[x][y];
     cell = val;
 }
 void memory::startCell(int x, int y, int row, int column) {//used to get the position of the first cell the user clicks on 
 	startX = x;
 	startY = y;
-	firstCardBoardX = row;
-	firstCardBoardY = column;
+	choiceX = row;
+	choiceY = column;
 }
 void memory::increasePairs() {//used to track score
 	correct += 1;
 	totalPairs -= 1;
 }
-int memory::getTotalMatched() {//gets number of matched pairs
-	return correct;
-}
-int memory::getTotalRemaining() {//gets total reamining 
-	return totalPairs;
-}
+ 
